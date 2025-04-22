@@ -1,26 +1,32 @@
 const express = require('express');
-const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const cocheRoutes = require("./routes/cocheRoutes");
 require('dotenv').config();
 
-const app = express();
-const port = 3000;
+const cocheRoutes = require("./routes/cocheRoutes");
+const authRoutes = require("./routes/auth");
 
-// Middleware para parsear las solicitudes
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Middleware para parsear JSON
+app.use(express.json());
 
 // Rutas
-app.use("/api", cocheRoutes);
+app.use("/api/coches", cocheRoutes);
+app.use("/api/auth", authRoutes);
+
+// Manejo de rutas no encontradas
+app.use((req, res) => {
+  res.status(404).json({ message: "Ruta no encontrada" });
+});
 
 // Conexión a la base de datos
 mongoose
-    .connect(process.env.MONGODB_URI)
-    .then(() => console.log("Conexión exitosa a MongoDB"))
-    .catch((error) => console.log("Error en la conexión:", error));
+  .connect(process.env.MONGODB_URI)
+  .then(() => console.log("Conexión exitosa a MongoDB"))
+  .catch((error) => console.log("Error en la conexión:", error));
 
 // Iniciar el servidor
 app.listen(port, () => {
-    console.log(`Servidor corriendo en el puerto ${port}`);
+  console.log(`Servidor corriendo en el puerto ${port}`);
 });
